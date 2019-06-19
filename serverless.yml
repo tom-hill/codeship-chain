@@ -1,0 +1,17 @@
+service: codeship-chain
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, self:custom.vars.STAGE}
+  region: ${opt:region, self:custom.vars.REGION}
+  stackName: ${self:custom.vars.STACK_NAME}
+  apiName: ${self:custom.vars.API_NAME}
+  versionFunctions: true
+
+functions:
+  codeshipChain:
+    handler: handler.chain
+
+custom:
+  vars: ${file(config/serverless.config.json)}

@@ -1,0 +1,6 @@
+{
+  "STAGE": "production",
+  "REGION": "us-east-1",
+  "STACK_NAME": "Codeship-Chain",
+  "API_NAME": "Codeship-Chain-Proxy"
+}

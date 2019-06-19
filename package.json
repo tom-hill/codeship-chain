@@ -1,0 +1,63 @@
+{
+  "name": "codeship-chain",
+  "version": "0.0.1",
+  "description": "A simple Lambda application to chain any two Codeship Pipelines together.",
+  "main": "index.js",
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "header-max-length": [
+        1,
+        "always",
+        200
+      ],
+      "references-empty": [
+        0,
+        "never"
+      ]
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm run test && lint-staged",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "scripts": {
+    "cm": "npx git-cz",
+    "deploy": "npx serverless deploy --verbose",
+    "provide-creds": "npx serverless config credentials --provider aws",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tom-hill/codeship-chain.git"
+  },
+  "keywords": [
+    "Codeship",
+    "Lambda",
+    "Pipeline",
+    "Chain"
+  ],
+  "author": "Tom Hill <tp.hill.uk@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tom-hill/codeship-chain/issues"
+  },
+  "homepage": "https://github.com/tom-hill/codeship-chain#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-conventional": "^8.0.0",
+    "commitizen": "^3.1.1",
+    "cz-conventional-changelog": "^2.1.0",
+    "husky": "^2.4.1",
+    "serverless": "^1.45.1"
+  }
+}
