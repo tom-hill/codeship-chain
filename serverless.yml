@@ -5,13 +5,16 @@ provider:
   runtime: nodejs10.x
   stage: ${opt:stage, self:custom.vars.STAGE}
   region: ${opt:region, self:custom.vars.REGION}
-  stackName: ${self:custom.vars.STACK_NAME}
-  apiName: ${self:custom.vars.API_NAME}
+  stackName: ${self:custom.vars.NAME}
+  apiName: ${self:custom.vars.NAME}
   versionFunctions: true
 
 functions:
   codeshipChain:
+    name: ${self:custom.vars.NAME}
     handler: handler.chain
+    events:
+      - http: ANY /ft-ui/
 
 custom:
   vars: ${file(config/serverless.config.json)}

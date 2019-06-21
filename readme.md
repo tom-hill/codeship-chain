@@ -16,6 +16,7 @@ To use this tool, take a copy of this repo, and then follow the instructions bel
  2. [Configuring the tool](#configuring-the-tool)
     1. [Configuring Codeship](#codeship)
     2. [Configuring AWS](#aws-serverless)
+    3. [Configuring the Serverless YML](#serverless-yaml)
 
 ---
 
@@ -39,31 +40,96 @@ There are two parts to the tool that need to be configured to your use. Codeship
 
 1. [Configuring Codeship](#codeship)
 2. [Configuring AWS](#aws-serverless)
+3. [Configuring the Serverless YML](#serverless-yaml)
 
 **Hint**: As we are using Codeship, you could use the `jet` tool and the `codeship.aes` key file to encrypt your secrets before you commit them, and decrypt it when you pull a new copy.
 
 ### Codeship
+
 The first step in configuring the tool, is to replace the dummy Codeship project/user credentials located inside
 [`config/codeship_secrets.example.json`](./config/codeship_secrets.example.json) and re-naming the file `codeship_secrets.json`
 
 ```json
 {
-  "org_id": "your codeship organisation ID",
-  "user": "your codeship username",
-  "password": "the password for the codeship user"
+  "org": "example-org",
+  "user": "user@example-org.co.uk",
+  "password": "password",
+  "projects": [
+    {
+      "trigger": "example-org/triggering-project",
+      "branches": ["develop", "master"],
+      "chained": ["example-org/chained-project"]
+    }
+  ]
 }
 ```
 
-**Example**
+You can use this setup to trigger multiple different chains, for different projects, and any branches you want.
+
+You can configure these 'chains' by adding multiple 'projects' to the projects array.
+
+So for example:
+
 ```json
-{
-  "org_id": "12345678-abcd-1234-efgh-567890ijklmn",
-  "user": "user@companyname.com",
-  "password": "P4ssw0rd!1"
-}
+"projects": [
+    {
+        "trigger": "example-org/triggering-project",
+        "branches": ["develop", "master"],
+        "chained": ["example-org/chained-project"]
+    },
+    {
+        "trigger": "example-org/triggering-project-b",
+        "branches": ["master"],
+        "chained": ["example-org/chained-project", "example-org/chained-project-B"]
+    }
+]
 ```
+
+In this example, a build of `develop` or `master` for the `example-org/triggering-project` would trigger a build of the same branch on `example-org/chained-project`.
+
+A build of `develop` would not trigger any builds for the `example-org/triggering-project-b`, but a build of `master` would trigger builds on `master` for both `example-org/chained-project` and `example-org/chained-project-B`.
 
 The resulting `codeship_secrets.json` file is already excluded from your repository by the `.gitignore` file so that you don't accidently leak your access details into your repository. If you choose to use a different file name, be sure to add it to the ignore list. Or to encrypt some how before you commit it to your repository.
 
 ### AWS (Serverless)
-TBC
+
+The next thing to configure is optional. You can change the variables in [`config/serverless.config.json`](./config/serverless.config.json).
+
+```json
+{
+  "STAGE": "production",
+  "REGION": "us-east-1",
+  "NAME": "Codeship-Chain"
+}
+```
+
+The `STAGE` is the name of the stage used in the publication of the API Gateway.<br/>
+The `REGION` is the AWS region that the services and stack should be created in.<br/>
+The `NAME` is the name of the stack that will be created by CloudFormation in your AWS account.
+
+### Serverless YAML
+
+Inside of the [`serverless.yml`](./serverless.yml) file you can customise the paths that are available via the API Gateway. This would allow you to have custom endpoints per chain if you desired, instead of them sharing one endpoint.
+
+```yaml
+functions:
+  codeshipChain:
+    name: ${self:custom.vars.NAME}
+    handler: handler.chain
+    events:
+      - http: ANY /
+```
+
+In the default, this will make the API respond to calls on the root only. If you wanted to have an endpoint for each build chain, you could use the triggers as the endpoint names. Using the endpoints from the previous examples, this would look like;
+
+```yaml
+functions:
+  codeshipChain:
+    name: ${self:custom.vars.NAME}
+    handler: handler.chain
+    events:
+      - http: ANY /triggering-project
+      - http: ANY /triggering-project-b
+```
+
+Although both of those endpoints will use the same base function. It may help you identify the intent of the process. This is entirely down to personal preference.

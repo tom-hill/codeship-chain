@@ -2,7 +2,7 @@
   "name": "codeship-chain",
   "version": "0.0.1",
   "description": "A simple Lambda application to chain any two Codeship Pipelines together.",
-  "main": "index.js",
+  "main": "handler.js",
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
@@ -33,7 +33,7 @@
   "scripts": {
     "cm": "npx git-cz",
     "deploy": "npx serverless deploy --verbose",
-    "provide-creds": "npx serverless config credentials --provider aws",
+    "provide-creds": "npx serverless config credentials -o --provider aws",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -59,5 +59,8 @@
     "cz-conventional-changelog": "^2.1.0",
     "husky": "^2.4.1",
     "serverless": "^1.45.1"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.0"
   }
 }

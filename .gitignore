@@ -57,3 +57,7 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+# Example Files
+codeship_secrets.json
+serverless.config.json
