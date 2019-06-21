@@ -17,6 +17,7 @@ To use this tool, take a copy of this repo, and then follow the instructions bel
     1. [Configuring Codeship](#codeship)
     2. [Configuring AWS](#aws-serverless)
     3. [Configuring the Serverless YML](#serverless-yaml)
+ 3. [Deploying](#deploying)
 
 ---
 
@@ -133,3 +134,25 @@ functions:
 ```
 
 Although both of those endpoints will use the same base function. It may help you identify the intent of the process. This is entirely down to personal preference.
+
+### Deploying
+
+To deploy the service, once tha app is configured (please ensure you have followed the steps in [first use](#first-use)) you can run `npm run deploy` this will use the serverless framework to deploy the app via CloudFormation.
+
+At the end of the deployment, you will see a list of outputs, this will include the URL you need to add to codeship in order to trigger the chain. The one you need is the `ServiceEndpoint`
+
+```bash
+Stack Outputs
+CodeshipChainLambdaFunctionQualifiedArn: <LAMBDA ARN IS HERE>
+ServiceEndpoint: https://example.execute-api.us-east-1.amazonaws.com/stage
+ServerlessDeploymentBucketName: <S3 BUCKET USED IN DEPLOY IS HERE>
+
+Serverless: Removing old service artifacts from S3...
+Serverless Enterprise: Run `serverless login` and deploy again to explore, monitor, secure your serverless project for free.
+```
+
+If you have configured the tool to use different endpoints then you would add these to the end. Using the examples from earlier this would look like `https://example.execute-api.us-east-1.amazonaws.com/stage/triggering-project` and `https://example.execute-api.us-east-1.amazonaws.com/stage/triggering-project-b`.
+
+You would then add these URLs to the triggering project in codeship under `settings > notifications` and then adding a new notification, and selecting 'Webhook'. You can set the branch to `*` for a wildcard if you wish, or multiple notifications one for each of your desired branches from the projects branches configuration in the `codeship_secrets.json` file. Using the url you got from your deployment, paste that into the 'Webhook URL' field, and then set the build event to `Succeeded`, and save.
+
+When you next have a successful deployment on that branch, it will trigger the Lambda function that will trigger the desired chained builds.
